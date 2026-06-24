@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as RawIcons from 'lucide-react';
+import fallbackData from './database/data.json';
 
 // ==========================================
 // LUCIDE ICON PROXY FOR v0.400+ RESOLUTION
@@ -370,12 +371,18 @@ export default function App() {
     const initData = async () => {
       setLoading(true);
       try {
-        // 1. Fetch public data from server database
-        const res = await fetch("/api/data");
-        if (!res.ok) {
-          throw new Error("Failed to fetch public data");
+        // 1. Fetch public data from server database or fallback to static JSON
+        let publicData;
+        try {
+          const res = await fetch("/api/data");
+          if (!res.ok) {
+            throw new Error("Failed to fetch public data");
+          }
+          publicData = await res.json();
+        } catch (e) {
+          console.log("Using static fallback data for GitHub Pages");
+          publicData = fallbackData;
         }
-        const publicData = await res.json();
         
         // Parse profile data
         const profile = publicData.profile || {};
